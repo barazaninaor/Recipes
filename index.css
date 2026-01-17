@@ -4,36 +4,86 @@
   box-sizing: border-box;
 }
 
-#container {
-  margin-top: 20px;
-  margin-bottom: 40px;
-  margin-right: 20px;
-  margin-left: 20px;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+body {
+  font-family: sans-serif;
+  background-color: #f0f2f5;
 }
 
 #container {
   display: flex;
-  gap: 2%
-  margin-top: 20px;
-  margin-bottom: 40px;
-  margin-right: 20px;
-  margin-left: 20px;
+  gap: 20px;
+  padding: 20px;
+  height: 100vh;
 }
 
+.column {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+/* רוחב עמודות למחשב */
+#foodCategories {
+  width: 25%;
+}
+#recipes {
+  width: 25%;
+}
+#instructions {
+  width: 45%;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
 
 .category-card,
 .meal-card {
-  width: 100%;
+  background: #f9f9f9;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  padding: 10px;
   margin-bottom: 15px;
-  box-sizing: border-box;
+  cursor: pointer;
+  transition: 0.3s;
+  text-align: center;
 }
 
-h1{
-  text-align: center;
+.active-card {
+  border-color: blue !important;
+}
+
+img {
+  width: 100%;
+  border-radius: 5px;
+  display: block;
+  margin-top: 10px;
+}
+
+/* עיצוב להוראות */
+.instruction-content {
+  line-height: 1.6;
+}
+
+.instruction-content p {
+  white-space: pre-line;
+  margin-top: 10px;
+}
+
+/* התאמה לנייד */
+@media (max-width: 768px) {
+  #container {
+    flex-direction: column;
+    height: auto; /* ביטול גובה קבוע בנייד */
+  }
+
+  .column {
+    width: 100% !important;
+    height: auto !important; /* שהטורים יגדלו לפי התוכן */
+    overflow-y: visible;
+  }
 }
