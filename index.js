@@ -10,20 +10,46 @@ window.onload = () => {
       const instructionsContainer = document.querySelector("#instructions");
       const container = document.querySelector("#container");
 
+      // פונקציה לעדכון העיצוב לפי גודל המסך
+      const updateLayout = () => {
+        if (window.innerWidth <= 768) {
+          // עיצוב לנייד
+          container.style.flexDirection = "column";
+          categoryContainer.style.width = "100%";
+          recipesContainer.style.width = "100%";
+          instructionsContainer.style.width = "100%";
+          
+          // בנייד נבטל את הגובה הקבוע כדי שהעמוד יזרום למטה
+          [categoryContainer, recipesContainer, instructionsContainer].forEach(
+            (el) => {
+              el.style.height = "auto";
+              el.style.overflowY = "visible";
+            }
+          );
+        } else {
+          // עיצוב למחשב (הקוד המקורי שלך)
+          container.style.flexDirection = "row";
+          categoryContainer.style.width = "25%";
+          recipesContainer.style.width = "25%";
+          instructionsContainer.style.width = "45%";
+          
+          [categoryContainer, recipesContainer, instructionsContainer].forEach(
+            (el) => {
+              el.style.height = "100vh";
+              el.style.overflowY = "auto";
+            }
+          );
+        }
+      };
+
       container.style.display = "flex";
       container.style.justifyContent = "space-between";
-      container.style.gap = "10px";
+      container.style.gap = "20px";
+      container.style.padding = "10px";
 
-      categoryContainer.style.width = "25%";
-      recipesContainer.style.width = "25%";
-      instructionsContainer.style.width = "45%";
-
-      [categoryContainer, recipesContainer, instructionsContainer].forEach(
-        (el) => {
-          el.style.height = "100vh";
-          el.style.overflowY = "auto";
-        }
-      );
+      // הפעלה ראשונית והאזנה לשינוי גודל מסך
+      updateLayout();
+      window.onresize = updateLayout;
 
       categoryContainer.innerHTML = "<h1>Categories</h1>";
 
@@ -34,16 +60,18 @@ window.onload = () => {
         newDiv.style.cursor = "pointer";
         newDiv.style.border = "4px solid transparent";
         newDiv.style.padding = "10px";
+        newDiv.style.backgroundColor = "#f9f9f9";
+        newDiv.style.borderRadius = "8px";
 
         let categoryh2 = document.createElement("h2");
         categoryh2.textContent = value.strCategory;
         categoryh2.style.textAlign = "center";
-        categoryh2.style.fontWeight = "bold";
-        categoryh2.style.padding = "10px";
+        categoryh2.style.fontSize = "1.2rem";
 
         let newImg = document.createElement("img");
         newImg.src = value.strCategoryThumb;
         newImg.style.width = "100%";
+        newImg.style.borderRadius = "5px";
 
         newDiv.appendChild(categoryh2);
         newDiv.appendChild(newImg);
@@ -54,6 +82,11 @@ window.onload = () => {
             div.style.borderColor = "transparent";
           });
           newDiv.style.borderColor = "blue";
+          
+          // גלילה אוטומטית למתכונים בנייד
+          if (window.innerWidth <= 768) {
+            recipesContainer.scrollIntoView({ behavior: 'smooth' });
+          }
 
           let recipesUrl = `https://www.themealdb.com/api/json/v1/1/filter.php?c=${value.strCategory}`;
 
@@ -72,17 +105,17 @@ window.onload = () => {
                 mealDiv.style.alignItems = "center";
                 mealDiv.style.border = "4px solid transparent";
                 mealDiv.style.padding = "10px";
+                mealDiv.style.backgroundColor = "#fff";
+                mealDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
 
                 let recipeH4 = document.createElement("h4");
                 recipeH4.textContent = meal.strMeal;
                 recipeH4.style.textAlign = "center";
-                recipeH4.style.fontWeight = "bold";
-                recipeH4.style.padding = "10px";
 
                 let recipeImg = document.createElement("img");
                 recipeImg.src = meal.strMealThumb;
-                recipeImg.classList.add("recipeImg");
-                recipeImg.style.width = "60%";
+                recipeImg.style.width = "80%";
+                recipeImg.style.borderRadius = "5px";
 
                 mealDiv.appendChild(recipeH4);
                 mealDiv.appendChild(recipeImg);
@@ -94,6 +127,11 @@ window.onload = () => {
                   });
                   mealDiv.style.borderColor = "blue";
 
+                  // גלילה אוטומטית להוראות בנייד
+                  if (window.innerWidth <= 768) {
+                    instructionsContainer.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  
                   let instructionsUrl = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`;
 
                   fetch(instructionsUrl)
@@ -103,90 +141,52 @@ window.onload = () => {
 
                       for (const instruction of instructionsData.meals) {
                         let instructionDiv = document.createElement("div");
-                        instructionDiv.classList.add("instruction-card");
-                        instructionDiv.style.marginTop = "20px";
-                        instructionDiv.style.display = "flex";
-                        instructionDiv.style.flexDirection = "column";
-                        instructionDiv.style.alignItems = "center";
-                        instructionDiv.style.padding = "15px";
+                        instructionDiv.style.width = "100%";
 
                         let recipeH2 = document.createElement("h2");
                         recipeH2.textContent = instruction.strMeal;
                         recipeH2.style.textAlign = "center";
-                        recipeH2.style.fontWeight = "bold";
-                        recipeH2.style.padding = "10px";
                         instructionDiv.appendChild(recipeH2);
 
-                        let categoryH3 = document.createElement("h3");
-                        categoryH3.textContent = `Category: ${instruction.strCategory}`;
-                        categoryH3.style.textAlign = "center";
-                        categoryH3.style.fontWeight = "bold";
-                        categoryH3.style.padding = "10px";
-                        instructionDiv.appendChild(categoryH3);
+                        // Ingredients
+                        let ingH4 = document.createElement("h4");
+                        ingH4.textContent = "Ingredients:";
+                        ingH4.style.textDecoration = "underline";
+                        instructionDiv.appendChild(ingH4);
 
-                        // Ingredients Section
-                        let ingredientsH4 = document.createElement("h4");
-                        ingredientsH4.textContent = "Ingredients & Measures:";
-                        ingredientsH4.style.fontWeight = "bold";
-                        ingredientsH4.style.textDecoration = "underline";
-                        instructionDiv.appendChild(ingredientsH4);
-
-                        let ingredientsList = document.createElement("ul");
+                        let ul = document.createElement("ul");
                         Object.keys(instruction).forEach((key) => {
-                          if (
-                            key.startsWith("strIngredient") &&
-                            instruction[key] &&
-                            instruction[key].trim() !== ""
-                          ) {
+                          if (key.startsWith("strIngredient") && instruction[key]?.trim()) {
                             let index = key.replace("strIngredient", "");
                             let measure = instruction[`strMeasure${index}`];
                             let li = document.createElement("li");
-                            li.textContent = `${instruction[key]} - ${
-                              measure ? measure : ""
-                            }`;
-                            ingredientsList.appendChild(li);
+                            li.textContent = `${instruction[key]} - ${measure || ""}`;
+                            ul.appendChild(li);
                           }
                         });
-                        instructionDiv.appendChild(ingredientsList);
+                        instructionDiv.appendChild(ul);
 
-                        // Instructions Section
+                        // Instructions
                         let stepsH4 = document.createElement("h4");
-                        stepsH4.textContent = "Preparation Steps:";
-                        stepsH4.style.fontWeight = "bold";
+                        stepsH4.textContent = "Preparation:";
                         stepsH4.style.marginTop = "20px";
-                        stepsH4.style.textDecoration = "underline";
                         instructionDiv.appendChild(stepsH4);
 
                         let stepsP = document.createElement("p");
                         stepsP.textContent = instruction.strInstructions;
                         stepsP.style.whiteSpace = "pre-line";
                         stepsP.style.lineHeight = "1.6";
-                        stepsP.style.textAlign = "left";
-                        stepsP.style.width = "100%";
                         instructionDiv.appendChild(stepsP);
 
-                        // YouTube Video Section
+                        // YouTube
                         if (instruction.strYoutube) {
-                          let videoH4 = document.createElement("h4");
-                          videoH4.textContent = "Video Tutorial:";
-                          videoH4.style.fontWeight = "bold";
-                          videoH4.style.marginTop = "20px";
-                          instructionDiv.appendChild(videoH4);
-
-                          // Converting regular link to embed link
                           let videoId = instruction.strYoutube.split("v=")[1];
-                          let embedUrl = `https://www.youtube.com/embed/${videoId}`;
-
                           let iframe = document.createElement("iframe");
-                          iframe.src = embedUrl;
+                          iframe.src = `https://www.youtube.com/embed/${videoId}`;
                           iframe.width = "100%";
-                          iframe.height = "315";
+                          iframe.height = "250"; // קצת יותר קטן לנייד
                           iframe.frameBorder = "0";
-                          iframe.allow =
-                            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
                           iframe.allowFullscreen = true;
-                          iframe.style.marginTop = "10px";
-
                           instructionDiv.appendChild(iframe);
                         }
 
