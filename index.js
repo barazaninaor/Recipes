@@ -6,35 +6,26 @@ window.onload = () => {
   const instructionsContainer = document.querySelector("#instructions");
 
   fetch(urlAllFoodCategories)
-    .then((response) => response.json())
+    .then((res) => res.json())
     .then((data) => {
       categoryContainer.innerHTML = "<h1>Categories</h1>";
-
       data.categories.forEach((value) => {
         let newDiv = document.createElement("div");
         newDiv.classList.add("category-card");
-
-        let categoryh2 = document.createElement("h2");
-        categoryh2.textContent = value.strCategory;
-        categoryh2.style.fontSize = "1.2rem";
-
-        let newImg = document.createElement("img");
-        newImg.src = value.strCategoryThumb;
-
-        newDiv.append(categoryh2, newImg);
-        categoryContainer.appendChild(newDiv);
+        newDiv.innerHTML = `<h2>${value.strCategory}</h2><img src="${value.strCategoryThumb}">`;
 
         newDiv.onclick = () => {
-          // עיצוב בחירה
+          // הופך את העמודה הבאה ללויה
+          recipesContainer.style.display = "block";
+          instructionsContainer.style.display = "none";
+
           document
             .querySelectorAll(".category-card")
             .forEach((d) => d.classList.remove("active-card"));
           newDiv.classList.add("active-card");
 
-          // גלילה בנייד
-          if (window.innerWidth <= 768) {
+          if (window.innerWidth <= 768)
             recipesContainer.scrollIntoView({ behavior: "smooth" });
-          }
 
           fetch(
             `https://www.themealdb.com/api/json/v1/1/filter.php?c=${value.strCategory}`
@@ -42,109 +33,66 @@ window.onload = () => {
             .then((res) => res.json())
             .then((mealData) => {
               recipesContainer.innerHTML = "<h1>Recipes</h1>";
-
               mealData.meals.forEach((meal) => {
                 let mealDiv = document.createElement("div");
                 mealDiv.classList.add("meal-card");
-
-                let recipeH4 = document.createElement("h4");
-                recipeH4.textContent = meal.strMeal;
-
-                let recipeImg = document.createElement("img");
-                recipeImg.src = meal.strMealThumb;
-                recipeImg.style.width = "80%";
-                recipeImg.style.margin = "10px auto";
-
-                mealDiv.append(recipeH4, recipeImg);
-                recipesContainer.appendChild(mealDiv);
+                mealDiv.innerHTML = `<h4>${meal.strMeal}</h4><img src="${meal.strMealThumb}">`;
 
                 mealDiv.onclick = () => {
+                  // הופך את עמודת ההוראות לגלויה
+                  instructionsContainer.style.display = "block";
+
                   document
                     .querySelectorAll(".meal-card")
                     .forEach((d) => d.classList.remove("active-card"));
                   mealDiv.classList.add("active-card");
 
-                  if (window.innerWidth <= 768) {
+                  if (window.innerWidth <= 768)
                     instructionsContainer.scrollIntoView({
                       behavior: "smooth",
                     });
-                  }
 
                   fetch(
                     `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`
                   )
                     .then((res) => res.json())
-                    .then((instructionsData) => {
+                    .then((instrData) => {
                       instructionsContainer.innerHTML = "<h1>Instructions</h1>";
-                      const instruction = instructionsData.meals[0];
+                      const mealInfo = instrData.meals[0];
+                      let content = document.createElement("div");
+                      content.classList.add("instruction-content");
 
-                      let instructionDiv = document.createElement("div");
-                      instructionDiv.classList.add("instruction-content");
-
-                      let recipeH2 = document.createElement("h2");
-                      recipeH2.textContent = instruction.strMeal;
-                      recipeH2.style.textAlign = "center";
-
-                      // Ingredients List
-                      let ingH4 = document.createElement("h4");
-                      ingH4.textContent = "Ingredients:";
-                      ingH4.style.textDecoration = "underline";
-                      ingH4.style.marginTop = "15px";
-
-                      let ul = document.createElement("ul");
-                      ul.style.paddingLeft = "20px";
-
-                      Object.keys(instruction).forEach((key) => {
-                        if (
-                          key.startsWith("strIngredient") &&
-                          instruction[key]?.trim()
-                        ) {
-                          let index = key.replace("strIngredient", "");
-                          let measure = instruction[`strMeasure${index}`];
-                          let li = document.createElement("li");
-                          li.textContent = `${instruction[key]} - ${
-                            measure || ""
-                          }`;
-                          ul.appendChild(li);
+                      // הרכבת רשימת רכיבים
+                      let ingredientsHTML = "<h4>Ingredients:</h4><ul>";
+                      for (let i = 1; i <= 20; i++) {
+                        let ing = mealInfo[`strIngredient${i}`];
+                        let meas = mealInfo[`strMeasure${i}`];
+                        if (ing && ing.trim()) {
+                          ingredientsHTML += `<li>${ing} - ${meas || ""}</li>`;
                         }
-                      });
+                      }
+                      ingredientsHTML += "</ul>";
 
-                      // Instructions Text
-                      let stepsH4 = document.createElement("h4");
-                      stepsH4.textContent = "Preparation:";
-                      stepsH4.style.marginTop = "20px";
+                      content.innerHTML = `
+                                                <h2>${mealInfo.strMeal}</h2>
+                                                ${ingredientsHTML}
+                                                <h4>Preparation:</h4>
+                                                <p>${mealInfo.strInstructions}</p>
+                                            `;
 
-                      let stepsP = document.createElement("p");
-                      stepsP.textContent = instruction.strInstructions;
-
-                      instructionDiv.append(
-                        recipeH2,
-                        ingH4,
-                        ul,
-                        stepsH4,
-                        stepsP
-                      );
-
-                      // YouTube
-                      if (instruction.strYoutube) {
-                        let videoId = instruction.strYoutube.split("v=")[1];
-                        let iframe = document.createElement("iframe");
-                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
-                        iframe.width = "100%";
-                        iframe.height =
-                          window.innerWidth <= 768 ? "200" : "315";
-                        iframe.frameBorder = "0";
-                        iframe.style.marginTop = "20px";
-                        iframe.allowFullscreen = true;
-                        instructionDiv.appendChild(iframe);
+                      if (mealInfo.strYoutube) {
+                        let videoId = mealInfo.strYoutube.split("v=")[1];
+                        content.innerHTML += `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="margin-top:20px;"></iframe>`;
                       }
 
-                      instructionsContainer.appendChild(instructionDiv);
+                      instructionsContainer.appendChild(content);
                     });
                 };
+                recipesContainer.appendChild(mealDiv);
               });
             });
         };
+        categoryContainer.appendChild(newDiv);
       });
     });
 };
