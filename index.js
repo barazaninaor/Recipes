@@ -15,7 +15,6 @@ window.onload = () => {
         newDiv.innerHTML = `<h2>${value.strCategory}</h2><img src="${value.strCategoryThumb}">`;
 
         newDiv.onclick = () => {
-          // הופך את העמודה הבאה ללויה
           recipesContainer.style.display = "block";
           instructionsContainer.style.display = "none";
 
@@ -39,7 +38,6 @@ window.onload = () => {
                 mealDiv.innerHTML = `<h4>${meal.strMeal}</h4><img src="${meal.strMealThumb}">`;
 
                 mealDiv.onclick = () => {
-                  // הופך את עמודת ההוראות לגלויה
                   instructionsContainer.style.display = "block";
 
                   document
@@ -62,8 +60,8 @@ window.onload = () => {
                       let content = document.createElement("div");
                       content.classList.add("instruction-content");
 
-                      // הרכבת רשימת רכיבים
-                      let ingredientsHTML = "<h4>Ingredients:</h4><ul>";
+                      let ingredientsHTML =
+                        "<h4>Ingredients & Measures:</h4><ul>";
                       for (let i = 1; i <= 20; i++) {
                         let ing = mealInfo[`strIngredient${i}`];
                         let meas = mealInfo[`strMeasure${i}`];
@@ -82,7 +80,11 @@ window.onload = () => {
 
                       if (mealInfo.strYoutube) {
                         let videoId = mealInfo.strYoutube.split("v=")[1];
-                        content.innerHTML += `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="margin-top:20px;"></iframe>`;
+                        // הוספת כותרת לסרטון
+                        content.innerHTML += `
+                                                    <h4>Video Tutorial:</h4>
+                                                    <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="margin-top:10px; border-radius:8px;"></iframe>
+                                                `;
                       }
 
                       instructionsContainer.appendChild(content);
